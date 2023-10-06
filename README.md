@@ -1,7 +1,6 @@
-# go-backend-sample
+# System Design 2023 homework
+Rasさんの [go-backend-sample](https://github.com/ras0q/go-backend-sample) をCloneして利用しています
 
-ハッカソンなど短期間でWebアプリを開発する際のバックエンドのGo実装例です。
-学習コストと開発コストを抑えることを目的としています。
 
 ## 使い方
 

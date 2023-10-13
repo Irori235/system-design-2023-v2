@@ -33,5 +33,6 @@ func MySQL() *mysql.Config {
 		DBName:               getEnv("DB_NAME", "app"),
 		Collation:            "utf8mb4_general_ci",
 		AllowNativePasswords: true,
+		ParseTime:            true,
 	}
 }

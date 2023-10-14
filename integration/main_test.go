@@ -1,25 +1,26 @@
 package integration
 
 import (
-	"go-backend-sample/internal/handler"
-	"go-backend-sample/internal/migration"
-	"go-backend-sample/internal/pkg/config"
-	"go-backend-sample/internal/repository"
 	"log"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
+	"github.com/Irori235/system-design-2023-v2/internal/handler"
+	"github.com/Irori235/system-design-2023-v2/internal/migration"
+	"github.com/Irori235/system-design-2023-v2/internal/pkg/config"
+	"github.com/Irori235/system-design-2023-v2/internal/repository"
+
+	"github.com/gin-gonic/gin"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/labstack/echo/v4"
 	"github.com/ory/dockertest/v3"
 )
 
 var (
 	db        *sqlx.DB
-	e         *echo.Echo
+	engine    *gin.Engine
 	r         *repository.Repository
 	h         *handler.Handler
 	userIDMap = make(map[string]uuid.UUID)
@@ -66,8 +67,8 @@ func TestMain(m *testing.M) {
 	// setup dependencies
 	r = repository.New(db)
 	h = handler.New(r)
-	e = echo.New()
-	h.SetupRoutes(e.Group("/api/v1"))
+	engine = gin.Default()
+	h.SetupRoutes(engine.Group("/api/v1"))
 
 	log.Println("start integration test")
 	m.Run()
@@ -81,9 +82,9 @@ func doRequest(t *testing.T, method, path string, bodystr string) *httptest.Resp
 	t.Helper()
 
 	req := httptest.NewRequest(method, path, strings.NewReader(bodystr))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
-	e.ServeHTTP(rec, req)
+	engine.ServeHTTP(rec, req)
 
 	return rec
 }

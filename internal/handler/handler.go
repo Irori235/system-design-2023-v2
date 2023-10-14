@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"go-backend-sample/internal/repository"
+	"github.com/Irori235/system-design-2023-v2/internal/repository"
 
-	"github.com/labstack/echo/v4"
+	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
@@ -16,15 +16,15 @@ func New(repo *repository.Repository) *Handler {
 	}
 }
 
-func (h *Handler) SetupRoutes(api *echo.Group) {
-	// ping API
-	pingAPI := api.Group("/ping")
+func (h *Handler) SetupRoutes(group *gin.RouterGroup) {
+	// ping group
+	pingAPI := group.Group("/ping")
 	{
 		pingAPI.GET("", h.Ping)
 	}
 
-	// user API
-	userAPI := api.Group("/users")
+	// user group
+	userAPI := group.Group("/users")
 	{
 		userAPI.GET("", h.GetUsers)
 		userAPI.POST("", h.CreateUser)

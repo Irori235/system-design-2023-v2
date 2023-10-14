@@ -1,22 +1,23 @@
 package main
 
 import (
-	"go-backend-sample/internal/handler"
-	"go-backend-sample/internal/migration"
-	"go-backend-sample/internal/pkg/config"
-	"go-backend-sample/internal/repository"
+	"github.com/Irori235/system-design-2023-v2/internal/handler"
+	"github.com/Irori235/system-design-2023-v2/internal/migration"
+	"github.com/Irori235/system-design-2023-v2/internal/pkg/config"
+	"github.com/Irori235/system-design-2023-v2/internal/repository"
 
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/middleware"
 	"github.com/jmoiron/sqlx"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
-	e := echo.New()
+	// setup gin
+	r := gin.Default()
 
 	// middlewares
-	e.Use(middleware.Recover())
-	e.Use(middleware.Logger())
+	r.Use(middleware.RequestID())
+	r.Use(middleware.Recovery())
 
 	// connect to database
 	db, err := sqlx.Connect("mysql", config.MySQL().FormatDSN())

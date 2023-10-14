@@ -3,9 +3,11 @@ package handler
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/gin-gonic/gin"
 )
 
-func (h *Handler) Ping(c echo.Context) error {
-	return c.String(http.StatusOK, "pong")
+func (h *Handler) Ping(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "pong",
+	})
 }

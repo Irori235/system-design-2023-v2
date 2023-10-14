@@ -2,13 +2,14 @@ package handler
 
 import (
 	"fmt"
-	"go-backend-sample/internal/repository"
 	"net/http"
 
+	"github.com/Irori235/system-design-2023-v2/internal/repository"
+
+	"github.com/gin-gonic/gin"
 	vd "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
 )
 
 // スキーマ定義
@@ -32,10 +33,12 @@ type (
 )
 
 // GET /api/v1/users
-func (h *Handler) GetUsers(c echo.Context) error {
-	users, err := h.repo.GetUsers(c.Request().Context())
+func (h *Handler) GetUsers(c *gin.Context) {
+	users, err := h.repo.GetUsers(c)
+
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError).SetInternal(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	res := make(GetUsersResponse, len(users))
@@ -47,14 +50,15 @@ func (h *Handler) GetUsers(c echo.Context) error {
 		}
 	}
 
-	return c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusOK, res)
 }
 
 // POST /api/v1/users
-func (h *Handler) CreateUser(c echo.Context) error {
+func (h *Handler) CreateUser(c *gin.Context) {
 	req := new(CreateUserRequest)
 	if err := c.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body").SetInternal(err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	err := vd.ValidateStruct(
@@ -63,7 +67,8 @@ func (h *Handler) CreateUser(c echo.Context) error {
 		vd.Field(&req.Email, vd.Required, is.Email),
 	)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err)).SetInternal(err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("invalid request body: %w", err).Error()})
+		return
 	}
 
 	params := repository.CreateUserParams{
@@ -71,28 +76,31 @@ func (h *Handler) CreateUser(c echo.Context) error {
 		Email: req.Email,
 	}
 
-	userID, err := h.repo.CreateUser(c.Request().Context(), params)
+	userID, err := h.repo.CreateUser(c, params)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError).SetInternal(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	res := CreateUserResponse{
 		ID: userID,
 	}
 
-	return c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusOK, res)
 }
 
 // GET /api/v1/users/:userID
-func (h *Handler) GetUser(c echo.Context) error {
+func (h *Handler) GetUser(c *gin.Context) {
 	userID, err := uuid.Parse(c.Param("userID"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid userID").SetInternal(err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("invalid userID: %w", err).Error()})
+		return
 	}
 
-	user, err := h.repo.GetUser(c.Request().Context(), userID)
+	user, err := h.repo.GetUser(c, userID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError).SetInternal(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	res := GetUserResponse{
@@ -101,5 +109,5 @@ func (h *Handler) GetUser(c echo.Context) error {
 		Email: user.Email,
 	}
 
-	return c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusOK, res)
 }

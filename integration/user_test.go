@@ -2,8 +2,9 @@ package integration
 
 import (
 	"encoding/json"
-	"go-backend-sample/internal/handler"
 	"testing"
+
+	"github.com/Irori235/system-design-2023-v2/internal/handler"
 
 	"github.com/google/uuid"
 )

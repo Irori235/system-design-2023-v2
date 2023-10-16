@@ -38,6 +38,7 @@ func (h *Handler) GetUsers(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	res := make(GetUsersResponse, len(users))
@@ -57,6 +58,7 @@ func (h *Handler) CreateUser(c *gin.Context) {
 	req := new(CreateUserRequest)
 	if err := c.Bind(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	err := vd.ValidateStruct(
@@ -66,6 +68,7 @@ func (h *Handler) CreateUser(c *gin.Context) {
 	)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("invalid request body: %w", err).Error()})
+		return
 	}
 
 	params := repository.CreateUserParams{
@@ -76,6 +79,7 @@ func (h *Handler) CreateUser(c *gin.Context) {
 	userID, err := h.repo.CreateUser(c, params)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	res := CreateUserResponse{
@@ -90,11 +94,13 @@ func (h *Handler) GetUser(c *gin.Context) {
 	userID, err := uuid.Parse(c.Param("userID"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("invalid userID: %w", err).Error()})
+		return
 	}
 
 	user, err := h.repo.GetUser(c, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	res := GetUserResponse{

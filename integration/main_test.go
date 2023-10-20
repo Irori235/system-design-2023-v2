@@ -24,6 +24,8 @@ var (
 	r         *repository.Repository
 	h         *handler.Handler
 	userIDMap = make(map[string]uuid.UUID)
+	taskMap   = make(map[string]handler.GetTaskResponse)
+	jwtMap    = make(map[string]string)
 )
 
 func TestMain(m *testing.M) {
@@ -67,7 +69,10 @@ func TestMain(m *testing.M) {
 	// setup dependencies
 	r = repository.New(db)
 	h = handler.New(r)
-	engine = gin.Default()
+	engine = gin.New()
+	engine.Use(gin.Recovery())
+	// engine.Use(gin.Logger())
+
 	h.SetupRoutes(engine.Group("/api/v1"))
 
 	log.Println("start integration test")
@@ -78,11 +83,19 @@ func TestMain(m *testing.M) {
 	}
 }
 
-func doRequest(t *testing.T, method, path string, bodystr string) *httptest.ResponseRecorder {
+func doRequest(t *testing.T, method, path string, bodystr string, headers ...map[string]string) *httptest.ResponseRecorder {
 	t.Helper()
 
 	req := httptest.NewRequest(method, path, strings.NewReader(bodystr))
 	req.Header.Set("Content-Type", "application/json")
+
+	if len(headers) > 0 {
+		header := headers[0]
+		for k, v := range header {
+			req.Header.Set(k, v)
+		}
+	}
+
 	rec := httptest.NewRecorder()
 	engine.ServeHTTP(rec, req)
 

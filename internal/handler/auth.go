@@ -112,24 +112,45 @@ func (h *Handler) SignIn(c *gin.Context) {
 		return
 	}
 
-	res := SignInResponse{
-		Token: token,
-	}
-
-	// set cookie
-	// cookie := &http.Cookie{
-	// 	Name:     "jwt",
-	// 	Value:    token,
-	// 	Expires:  time.Now().Add(3 * time.Hour),
-	// 	HttpOnly: true,
-	// 	// Secure:   true,
-	// 	Path:     "/",
-	// 	SameSite: http.SameSiteStrictMode,
+	// res := SignInResponse{
+	// 	Token: token,
 	// }
 
-	// http.SetCookie(c.Writer, cookie)
+	// set cookie
+	cookie := &http.Cookie{
+		Name:     "jwt",
+		Value:    token,
+		Expires:  time.Now().Add(3 * time.Hour),
+		HttpOnly: true,
+		// Secure:   true,
+		Path: "/",
+		// SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteLaxMode,
+	}
 
-	c.JSON(http.StatusOK, res)
+	http.SetCookie(c.Writer, cookie)
+	// http.Header.Add(c.Writer.Header(), "Access-Control-Allow-Credentials", "true")
+
+	// c.JSON(http.StatusOK, res)
+}
+
+func (h *Handler) SignOut(c *gin.Context) {
+	// delete cookie
+	cookie := &http.Cookie{
+		Name:     "jwt",
+		Value:    "expired",
+		Expires:  time.Now().Add(-time.Hour),
+		HttpOnly: true,
+		// Secure:   true,
+		Path: "/",
+		// SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteLaxMode,
+	}
+
+	http.SetCookie(c.Writer, cookie)
+	// http.Header.Add(c.Writer.Header(), "Access-Control-Allow-Credentials", "true")
+
+	c.JSON(http.StatusOK, gin.H{})
 }
 
 func generateJWT(userID string, jwtSecret string) (string, error) {

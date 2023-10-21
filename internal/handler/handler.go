@@ -44,7 +44,6 @@ func (h *Handler) SetupRoutes(group *gin.RouterGroup) {
 	taskAPI.Use(h.AuthMiddleware())
 	{
 		taskAPI.GET("", h.GetTasks)
-		taskAPI.GET("/search", h.SearchTasks)
 		taskAPI.POST("", h.CreateTask)
 		taskAPI.PUT("/:taskID", h.UpdateTask)
 		taskAPI.DELETE("/:taskID", h.DeleteTask)
@@ -55,6 +54,7 @@ func (h *Handler) SetupRoutes(group *gin.RouterGroup) {
 	{
 		authAPI.POST("/signup", h.SignUp)
 		authAPI.POST("/signin", h.SignIn)
+		authAPI.POST("/signout", h.SignOut)
 	}
 }
 

@@ -11,14 +11,26 @@ import (
 
 func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Authorization header is required"})
+		cookieHeader := c.GetHeader("cookie")
+		if cookieHeader == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Cookie header is required"})
 			c.Abort()
 			return
 		}
 
-		tokenString := strings.Replace(authHeader, "Bearer ", "", 1)
+		cookies := strings.Split(cookieHeader, ";")
+		var tokenString string
+		for _, cookie := range cookies {
+			if strings.Contains(cookie, "jwt=") {
+				tokenString = strings.Replace(cookie, "jwt=", "", 1)
+			}
+		}
+		if tokenString == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "jwt cookie is required"})
+			c.Abort()
+			return
+		}
+
 		claims := &Claims{}
 
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
@@ -26,7 +38,7 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 		})
 
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			c.Abort()
 			return
 		}

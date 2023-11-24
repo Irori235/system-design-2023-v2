@@ -1,13 +1,27 @@
 version: "3"
 
 services:
-  app:
+  envoy:
+    build:
+      context: ./envoy
+      dockerfile: Dockerfile
+    ports:
+      - "80:10000"
+      - "9091:9901"
+    depends_on:
+      - server
+      - client
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./envoy/envoy.yaml
+
+  server:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
     environment:
+      APP_ENV: development
       APP_ADDR: :8080
       DB_USER: root
       DB_PASS: pass
@@ -21,6 +35,19 @@ services:
       watch:
         - action: rebuild
           path: ./
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      target: dev
+    develop:
+      watch:
+        - action: rebuild
+          path: ./client/
+          ignore:
+            - ./client/.next
+            - ./client/node_modules
 
   mysql:
     image: mysql:latest

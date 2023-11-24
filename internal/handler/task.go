@@ -61,12 +61,6 @@ func (h *Handler) GetTasks(c *gin.Context) {
 
 }
 
-// GET /api/v1/tasks/search
-func (h *Handler) SearchTasks(c *gin.Context) {
-	// TODO
-	c.JSON(http.StatusOK, gin.H{})
-}
-
 // POST /api/v1/tasks
 func (h *Handler) CreateTask(c *gin.Context) {
 	req := new(CreateTaskRequest)

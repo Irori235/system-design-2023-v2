@@ -16,6 +16,10 @@ func getEnv(key, defaultValue string) string {
 	return v
 }
 
+func AppEnv() string {
+	return getEnv("APP_ENV", "development")
+}
+
 func AppAddr() string {
 	return getEnv("APP_ADDR", ":8080")
 }
